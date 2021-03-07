@@ -60,7 +60,7 @@ bot.on('guildMemberAdd', async newMember => {
 
 })
 bot.on('guildMemberAdd', guildMember =>{
-    let welcomeRole = guildMember.guild.roles.cache.find(role => role.name === 'member');
+    let welcomeRole = guildMember.guild.roles.cache.find(role => role.name === 'Member');
     if (guildMember.bot) return;
     guildMember.roles.add(welcomeRole);
 });
