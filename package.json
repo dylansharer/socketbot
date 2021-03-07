@@ -4,7 +4,8 @@
   "description": "Socket Bot",
   "main": "socketbot.js",
   "scripts": {
-    "start": "nodemon socketbot.js",
+    "start": "node socketbot.js",
+    "local": "nodemon socketbot.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
