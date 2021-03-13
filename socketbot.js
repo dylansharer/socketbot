@@ -1,68 +1,43 @@
-const Discord = require('discord.js');
-const bot = new Discord.Client();
-const fs = require('fs');
-bot.commands = new Discord.Collection();
+const Discord = require('discord.js')
+const client = new Discord.Client()
 
-const config = require('./config.js');
+const config = require('./config.json')
+const command = require('./command')
 
-fs.readdir('./commands', (err, files) => {
-    if(err) return console.log(err);
+client.on('ready', () => {
+  console.log('The client is ready!')
 
-    let jsfile = files.filter(file => file.split(".").pop() === 'js');
+  command(client, ['ping', 'test'], (message) => {
+    message.channel.send('Pong!')
+  })
 
-    if (jsfile.length <= 0) return console.log("Could not find commands!")
-
-    jsfile.forEach(file => {
-        let props = require(`./commands/${file}`); // './commands/socials.js'
-        bot.commands.set(props.help.name, props);
+  command(client, 'servers', (message) => {
+    client.guilds.cache.forEach((guild) => {
+      message.channel.send(
+        `${guild.name} has a total of ${guild.memberCount} members`
+      )
     })
-})
+  })
 
-const prefix = '-';
-
-// this runs when you receive a message
-bot.on('message', (message) => {
-    if(message.author.bot) return;
-    if(message.channel.type !== 'text') return;
-
-    //console.log('Message received', message.content)
-
-    let MessageArray = message.content.split(' ');
-    let cmd = MessageArray[0].slice(prefix.length) // opensea
-    let args = MessageArray.slice(1) // []
-
-    if(!message.content.startsWith(prefix)) return;
-
-    let commandfile = bot.commands.get(cmd);
-
-    if(commandfile) {
-        commandfile.run(bot, message, args);
+  command(client, ['cc', 'clearchannel'], (message) => {
+    if (message.member.hasPermission('ADMINISTRATOR')) {
+      message.channel.messages.fetch().then((results) => {
+        message.channel.bulkDelete(results)
+      })
     }
-});
- 
+  })
 
+  command(client, 'status', (message) => {
+    const content = message.content.replace('!status ', '')
+    // "!status hello world" -> "hello world"
 
-bot.once('ready', () => {
-    console.log('SocketBot is online!');
-});
-
-
-bot.on('guildMemberAdd', async newMember => {
-    const welcomeChannel = newMember.guild.channels.cache.find(channel => channel.name === '👋welcome')
-
-    let msgEmbed = new Discord.MessageEmbed()
-    .setTitle (`Welcome @${newMember.user.username}!`)
-    .setColor('#007b5a')
-    .setThumbnail(newMember.user.avatarURL())
-    .setDescription(`Welcome to the official Sockets server!\nMake sure to check out the rules and social channels!\n**Current Member Count:** ${newMember.guild.memberCount}`)
-    .setFooter(newMember.guild.name, newMember.guild.iconURL())
-    welcomeChannel.send(msgEmbed)
-
+    client.user.setPresence({
+      activity: {
+        name: content,
+        type: 0,
+      },
+    })
+  })
 })
-bot.on('guildMemberAdd', guildMember =>{
-    let welcomeRole = guildMember.guild.roles.cache.find(role => role.name === 'Member');
-    if (guildMember.bot) return;
-    guildMember.roles.add(welcomeRole);
-});
 
-bot.login(config.discordToken); 
+client.login(config.discordToken); 
