@@ -18,5 +18,5 @@ module.exports.run = async (bot, message, args) => {
 
 
 exports.help = {
-    name: 'ann',
+    name: 'ann'
 }
