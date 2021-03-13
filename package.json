@@ -2,10 +2,10 @@
   "name": "discordbot",
   "version": "1.0.0",
   "description": "Socket Bot",
-  "main": "index.js",
+  "main": "socketbot.js",
   "scripts": {
-    "start": "node index.js",
-    "local": "nodemon index.js",
+    "start": "node socketbot.js",
+    "local": "nodemon socketbot.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
