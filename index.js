@@ -40,4 +40,4 @@ client.on('ready', () => {
   })
 })
 
-bot.login(config.discordToken); 
+client.login(config.discordToken); 
