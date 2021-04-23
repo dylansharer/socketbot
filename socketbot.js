@@ -47,23 +47,23 @@ bot.once('ready', () => {
 });
 
 
-bot.on('guildMemberAdd', async newMember => {
-    const welcomeChannel = newMember.guild.channels.cache.find(channel => channel.name === '👋welcome')
+// bot.on('guildMemberAdd', async newMember => {
+//     const welcomeChannel = newMember.guild.channels.cache.find(channel => channel.name === '👋welcome')
 
-    let msgEmbed = new Discord.MessageEmbed()
-    .setTitle (`Welcome @${newMember.user.username}!`)
-    .setColor('#007b5a')
-    .setThumbnail(newMember.user.avatarURL())
-    .setDescription(`Welcome to the official Sockets server!\nMake sure to check out the rules and social channels!\n**Current Member Count:** ${newMember.guild.memberCount}`)
-    .setFooter(newMember.guild.name, newMember.guild.iconURL())
-    welcomeChannel.send(msgEmbed)
+//     let msgEmbed = new Discord.MessageEmbed()
+//     .setTitle (`Welcome @${newMember.user.username}!`)
+//     .setColor('#007b5a')
+//     .setThumbnail(newMember.user.avatarURL())
+//     .setDescription(`Welcome to the official Sockets server!\nMake sure to check out the rules and social channels!\n**Current Member Count:** ${newMember.guild.memberCount}`)
+//     .setFooter(newMember.guild.name, newMember.guild.iconURL())
+//     welcomeChannel.send(msgEmbed)
 
-})
-bot.on('guildMemberAdd', guildMember =>{
-    let welcomeRole = guildMember.guild.roles.cache.find(role => role.name === 'Member');
-    if (guildMember.bot) return;
-    guildMember.roles.add(welcomeRole);
-});
+// })
+// bot.on('guildMemberAdd', guildMember =>{
+//     let welcomeRole = guildMember.guild.roles.cache.find(role => role.name === 'Member');
+//     if (guildMember.bot) return;
+//     guildMember.roles.add(welcomeRole);
+// });
 
 bot.login(config.discordToken); 
 
