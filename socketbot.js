@@ -1,69 +1,66 @@
-const Discord = require('discord.js');
-const bot = new Discord.Client();
-const fs = require('fs');
-bot.commands = new Discord.Collection();
+import 'dotenv/config';
+import Discord from 'discord.js';
+import fetch from 'node-fetch';
+import { ethers } from "ethers";
+const discordBot = new Discord.Client();
 
-const config = require('./config.js');
+const discordSetup = async () => {
+    return new Promise((resolve, reject) => {
+        ['DISCORD_BOT_TOKEN', 'DISCORD_CHANNEL_ID'].forEach((envVar) => {
+            if (!process.env[envVar])
+                reject(`${envVar} not set`);
+        });
+        discordBot.login(process.env.DISCORD_BOT_TOKEN);
+        discordBot.on('ready', async () => {
+            const channel = await discordBot.channels.fetch(process.env.DISCORD_CHANNEL_ID);
+            resolve(channel);
+        });
+    });
+};
 
-fs.readdir('./commands', (err, files) => {
-    if(err) return console.log(err);
+const buildMessage = (sale) => {
+    var _a, _b;
+    return (new Discord.MessageEmbed()
+        .setColor('#0099ff')
+        .setTitle(sale.asset.name + ' sold!')
+        .setURL(sale.asset.permalink)
+        //.setAuthor('OpenSea Bot', 'https://files.readme.io/566c72b-opensea-logomark-full-colored.png', 'https://github.com/sbauch/opensea-discord-bot')
+        .setThumbnail(sale.asset.collection.image_url)
+        .addFields(
+            { name: 'Name', value: sale.asset.name }, 
+            { name: 'Amount', value: `${ethers.utils.formatEther(sale.total_price)}${ethers.constants.EtherSymbol}` }, 
+            { name: 'Buyer', value: (_a = sale === null || sale === void 0 ? void 0 : sale.winner_account) === null || _a === void 0 ? void 0 : _a.address, }, 
+            { name: 'Seller', value: (_b = sale === null || sale === void 0 ? void 0 : sale.seller) === null || _b === void 0 ? void 0 : _b.address, }
+        )
+        .setImage(sale.asset.image_url)
+        .setTimestamp(sale.created_date) // unclear why this seems broken
+        .setFooter('Sold on OpenSea', 'https://files.readme.io/566c72b-opensea-logomark-full-colored.png'));
+};
 
-    let jsfile = files.filter(file => file.split(".").pop() === 'js');
+async function main() {
+    var _a;
+    const channel = await discordSetup();
+    const seconds = process.env.SECONDS ? parseInt(process.env.SECONDS) : 3600;
+    const hoursAgo = (Math.round(new Date().getTime() / 1000) - (seconds)); // in the last hour, run hourly?
+    const openSeaResponse = await fetch("https://api.opensea.io/api/v1/events?" + new URLSearchParams({
+        offset: '0',
+        limit: '100',
+        event_type: 'successful',
+        only_opensea: 'true',
+        occurred_after: hoursAgo.toString(),
+        collection_slug: process.env.COLLECTION_SLUG,
+        contract_address: process.env.CONTRACT_ADDRESS
+    })).then((resp) => resp.json());
+    await Promise.all((_a = openSeaResponse === null || openSeaResponse === void 0 ? void 0 : openSeaResponse.asset_events) === null || _a === void 0 ? void 0 : _a.map(async (sale) => {
+        const message = buildMessage(sale);
+        return channel.send(message);
+    }));
+}
 
-    if (jsfile.length <= 0) return console.log("No commands found!")
-
-    jsfile.forEach(file => {
-        let props = require(`./commands/${file}`); // './commands/socials.js'
-        bot.commands.set(props.help.name, props);
-    })
-})
-
-const prefix = '-';
-
-// this runs when you receive a message
-bot.on('message', (message) => {
-    if(message.author.bot) return;
-    if(message.channel.type !== 'text') return;
-
-    //console.log('Message received', message.content)
-
-    let MessageArray = message.content.split(' ');
-    let cmd = MessageArray[0].slice(prefix.length) // opensea
-    let args = MessageArray.slice(1) // []
-
-    if(!message.content.startsWith(prefix)) return;
-
-    let commandfile = bot.commands.get(cmd);
-
-    if(commandfile) {
-        commandfile.run(bot, message, args);
+main()
+    .then(() => process.exit(0))
+    .catch(error => {
+        console.error(error);
+        process.exit(1);
     }
-});
-
-
-
-bot.once('ready', () => {
-    console.log('SocketBot is online!');
-});
-
-
-// bot.on('guildMemberAdd', async newMember => {
-//     const welcomeChannel = newMember.guild.channels.cache.find(channel => channel.name === '👋welcome')
-
-//     let msgEmbed = new Discord.MessageEmbed()
-//     .setTitle (`Welcome @${newMember.user.username}!`)
-//     .setColor('#007b5a')
-//     .setThumbnail(newMember.user.avatarURL())
-//     .setDescription(`Welcome to the official Sockets server!\nMake sure to check out the rules and social channels!\n**Current Member Count:** ${newMember.guild.memberCount}`)
-//     .setFooter(newMember.guild.name, newMember.guild.iconURL())
-//     welcomeChannel.send(msgEmbed)
-
-// })
-// bot.on('guildMemberAdd', guildMember =>{
-//     let welcomeRole = guildMember.guild.roles.cache.find(role => role.name === 'Member');
-//     if (guildMember.bot) return;
-//     guildMember.roles.add(welcomeRole);
-// });
-
-bot.login(config.discordToken); 
-
+);
