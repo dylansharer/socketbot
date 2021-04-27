@@ -1,16 +1,17 @@
-import 'dotenv/config';
+import 'dotenv/config.js';
 import Discord from 'discord.js';
 import fetch from 'node-fetch';
 import { ethers } from "ethers";
 const discordBot = new Discord.Client();
 
 const discordSetup = async () => {
+    console.log(process.env);
     return new Promise((resolve, reject) => {
-        ['DISCORD_BOT_TOKEN', 'DISCORD_CHANNEL_ID'].forEach((envVar) => {
+        ['DISCORD_TOKEN', 'DISCORD_CHANNEL_ID'].forEach((envVar) => {
             if (!process.env[envVar])
                 reject(`${envVar} not set`);
         });
-        discordBot.login(process.env.DISCORD_BOT_TOKEN);
+        discordBot.login(process.env.DISCORD_TOKEN);
         discordBot.on('ready', async () => {
             const channel = await discordBot.channels.fetch(process.env.DISCORD_CHANNEL_ID);
             resolve(channel);
