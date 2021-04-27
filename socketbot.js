@@ -5,7 +5,6 @@ import { ethers } from "ethers";
 const discordBot = new Discord.Client();
 
 const discordSetup = async () => {
-    console.log(process.env);
     return new Promise((resolve, reject) => {
         ['DISCORD_TOKEN', 'DISCORD_CHANNEL_ID'].forEach((envVar) => {
             if (!process.env[envVar])
