@@ -39,6 +39,7 @@ const buildMessage = (sale) => {
 
 async function main() {
     var _a;
+    console.log('test')
     const channel = await discordSetup();
     const seconds = process.env.SECONDS ? parseInt(process.env.SECONDS) : 3600;
     const hoursAgo = (Math.round(new Date().getTime() / 1000) - (seconds)); // in the last hour, run hourly?
