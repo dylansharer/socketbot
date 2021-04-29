@@ -25,7 +25,7 @@ const buildMessage = (sale) => {
         .setTitle(sale.asset.name + ' sold!')
         .setURL(sale.asset.permalink)
         //.setAuthor('OpenSea Bot', 'https://files.readme.io/566c72b-opensea-logomark-full-colored.png', 'https://github.com/sbauch/opensea-discord-bot')
-        .setThumbnail(sale.asset.collection.image_url)
+        //.setThumbnail(sale.asset.collection.image_url)
         .addFields(
             { name: 'Name', value: sale.asset.name }, 
             { name: 'Amount', value: `${ethers.utils.formatEther(sale.total_price)}${ethers.constants.EtherSymbol}` }, 
@@ -43,15 +43,15 @@ async function runBot() {
     const main = async () => {
         var _a;
         /* Give me a list sales in the last hour, can be an empty list */
-        const seconds = process.env.SECONDS ? parseInt(process.env.SECONDS) : 3600;
-        const hoursAgo = (Math.round(new Date().getTime() / 1000) - (seconds)); // in the last hour, run hourly?
+        const seconds = process.env.SECONDS ? parseInt(process.env.SECONDS) : 600;
+        const minsAgo = (Math.round(new Date().getTime() / 1000) - (seconds)); // in the last X mins
         
         const openSeaResponse = await fetch("https://api.opensea.io/api/v1/events?" + new URLSearchParams({
             offset: '0',
             limit: '100',
             event_type: 'successful',
             only_opensea: 'true',
-            occurred_after: hoursAgo.toString(),
+            occurred_after: minsAgo.toString(),
             collection_slug: process.env.COLLECTION_SLUG,
             contract_address: process.env.CONTRACT_ADDRESS
     
@@ -63,7 +63,7 @@ async function runBot() {
         }));
     }
     
-    setInterval(main, 1000 * 60 * 60);
+    setInterval(main, 600000); // 60000ms = 10min
 }
 
 runBot();
