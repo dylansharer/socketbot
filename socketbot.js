@@ -2,6 +2,7 @@ import 'dotenv/config.js';
 import Discord from 'discord.js';
 import fetch from 'node-fetch';
 import { ethers } from "ethers";
+import Vibrant from 'node-vibrant';
 const discordBot = new Discord.Client();
 
 const discordSetup = async () => {
@@ -18,10 +19,15 @@ const discordSetup = async () => {
     });
 };
 
-const buildMessage = (sale) => {
+const buildMessage = async (sale) => {
     var _a, _b;
+
+    const socketBackgroundHex = await Vibrant.from(sale.asset.image_url).getSwatches()
+        .then(res => Object.values(res).sort((a, b) => b._population - a._population)[0].hex)
+        .catch(() => "#0099ff");
+
     return (new Discord.MessageEmbed()
-        .setColor('#0099ff')
+        .setColor(socketBackgroundHex)
         .setTitle(sale.asset.name + ' sold!')
         .setURL(sale.asset.permalink)
         //.setAuthor('OpenSea Bot', 'https://files.readme.io/566c72b-opensea-logomark-full-colored.png', 'https://github.com/sbauch/opensea-discord-bot')
@@ -66,4 +72,17 @@ async function runBot() {
     setInterval(main, 600000); // 60000ms = 10min
 }
 
+const mockOpenSeaResponse = {
+    asset: {
+        name: "",
+        image_url: "https://lh3.googleusercontent.com/YZzSDru7kiDziTgn1sNGI_Tbi5J6Af-DPnygeQa5Ar5Z55gktaMtfTSEC2sV5VxsAHANenWrTdDElULjLmolHQ6SI-oT1k2rtYYI=s270"
+    },
+    winner_account: "",
+    address: "",
+    seller: "",
+    created_date: ""
+}
+
 runBot();
+
+//buildMessage(mockOpenSeaResponse);
